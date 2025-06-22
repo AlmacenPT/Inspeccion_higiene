@@ -21,7 +21,7 @@
       margin-top: 15px;
       font-weight: bold;
     }
-    select, input[type="text"], textarea, datalist {
+    select, input[type="text"], textarea {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
@@ -51,10 +51,10 @@
   <h2>Checklist de Higiene - Almacén</h2>
   <form id="formulario">
     <label>Nombre del trabajador:
-      <input list="trabajadores" name="trabajador" required>
-      <datalist id="trabajadores">
-        <!-- Las opciones se cargarán dinámicamente -->
-      </datalist>
+      <select id="trabajador" name="trabajador" required>
+        <option value="">Selecciona un trabajador</option>
+      </select>
+      <input type="text" id="otroTrabajador" name="otroTrabajador" placeholder="Escribe el nombre si no está en la lista" style="display:none;" />
     </label>
 
     <label>Uniforme limpio y completo:
@@ -93,37 +93,80 @@
   </form>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/PASTE_HERE_YOUR_WEB_APP_URL/exec';
+    const scriptURL = 'https://script.google.com/macros/s/exec';
+    const listURL = 'https://script.google.com/macros/s/AKfycbzncYwulsScLe0kYjGKVmLAkV_4iE6uwCXGOiYZjbwCqAWtMSEiX5kQJ9cgKMxh6Hzm/exec';
     const form = document.getElementById('formulario');
+    const selectTrabajador = document.getElementById('trabajador');
+    const inputOtro = document.getElementById('otroTrabajador');
 
     form.addEventListener('submit', e => {
-      e.preventDefault();
-      const formData = new FormData(form);
-
-      fetch(scriptURL, { method: 'POST', body: formData })
-        .then(response => {
-          if (response.ok) {
-            alert('Formulario enviado correctamente');
-            form.reset();
-          } else {
-            alert('Error al enviar el formulario.');
-          }
-        })
-        .catch(error => alert('Error de conexión: ' + error.message));
+      if (selectTrabajador.value === 'otro') {
+        const otro = inputOtro.value.trim();
+        if (!otro) {
+          alert('Por favor ingrese un nombre de trabajador válido.');
+          e.preventDefault();
+          return;
+        }
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'trabajador';
+        hiddenInput.value = otro;
+        form.appendChild(hiddenInput);
+        selectTrabajador.disabled = true;
+      }
     });
 
-    // Cargar nombres desde Apps Script JSON Web App
-    fetch('https://script.google.com/macros/s/AKfycbzx3Ysa4ZVP6o1qYeNPUQ3OxcFN0W5MKgXaelWFy3qVu1deyRl59ZfKZKqASUPjEkHG/exec')
-      .then(response => response.json())
-      .then(nombres => {
-        const datalist = document.getElementById('trabajadores');
-        nombres.forEach(nombre => {
-          const option = document.createElement('option');
-          option.value = nombre;
-          datalist.appendChild(option);
+    async function cargarTrabajadores() {
+      try {
+        const response = await fetch(listURL);
+        const contentType = response.headers.get('content-type') || '';
+
+        if (!response.ok || !contentType.includes('application/json')) {
+          throw new Error(`Respuesta inesperada: HTTP ${response.status}, Content-Type: ${contentType}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error('Formato inesperado en la respuesta JSON. Se esperaba un arreglo.');
+        }
+
+        let added = false;
+        data.forEach(nombre => {
+          if (typeof nombre === 'string' && nombre.trim()) {
+            const option = document.createElement('option');
+            option.value = nombre;
+            option.textContent = nombre;
+            selectTrabajador.appendChild(option);
+            added = true;
+          }
         });
-      })
-      .catch(error => console.error('Error cargando lista de trabajadores:', error));
+
+        const optionOtro = document.createElement('option');
+        optionOtro.value = 'otro';
+        optionOtro.textContent = 'Otro (escribir manualmente)';
+        selectTrabajador.appendChild(optionOtro);
+
+        if (!added) {
+          throw new Error('La lista de trabajadores está vacía.');
+        }
+
+      } catch (error) {
+        console.error('Error cargando lista de trabajadores:', error);
+        const fallback = document.createElement('option');
+        fallback.value = "otro";
+        fallback.textContent = "(No se pudo cargar, escriba manualmente)";
+        selectTrabajador.appendChild(fallback);
+        inputOtro.style.display = 'block';
+        alert('No se pudo cargar la lista de trabajadores. Ingrese el nombre manualmente.');
+      }
+    }
+
+    selectTrabajador.addEventListener('change', () => {
+      inputOtro.style.display = selectTrabajador.value === 'otro' ? 'block' : 'none';
+    });
+
+    cargarTrabajadores();
   </script>
 </body>
 </html>
