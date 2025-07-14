@@ -93,7 +93,7 @@
   </form>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbw0AEh7vWvOGl4XaN9OhPCPDLun__2JHeGwh9-qMLA8UiiyBFIwx967gEytNXyLPxnP/exec';
     const listURL = 'https://script.google.com/macros/s/AKfycbzncYwulsScLe0kYjGKVmLAkV_4iE6uwCXGOiYZjbwCqAWtMSEiX5kQJ9cgKMxh6Hzm/exec';
     const form = document.getElementById('formulario');
     const selectTrabajador = document.getElementById('trabajador');
@@ -167,6 +167,21 @@
     });
 
     cargarTrabajadores();
+ form.addEventListener('submit', e => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      fetch(scriptURL, { method: 'POST', body: formData })
+        .then(response => {
+          if (response.ok) {
+            alert('Formulario enviado correctamente');
+            form.reset();
+          } else {
+            alert('Error al enviar el formulario.');
+          }
+        })
+        .catch(error => alert('Error de conexión: ' + error.message));
+    });
   </script>
 </body>
 </html>
