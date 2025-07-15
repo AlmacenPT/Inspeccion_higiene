@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checklist de Higiene - Almacén</title>
+  <title>Checklist higiene personal </title>
   <style>
     body {
       font-family: sans-serif;
@@ -50,6 +50,20 @@
 <body>
   <h2>Checklist de Higiene - Almacén</h2>
   <form id="formulario">
+  
+  <label>Turno:
+      <select name="turno" required>
+        <option value="">Seleccione un turno</option>
+        <option value="05:00-13:00">05:00-13:00</option>
+        <option value="13:00-21:00">13:00-21:00</option>
+        <option value="21:00-05:00">21:00-05:00</option>
+      </select>
+    </label>
+
+    <label>Almacenero responsable:
+      <input type="text" name="almacenero" required placeholder="Nombre del almacenero" />
+    </label>
+
     <label>Nombre del trabajador:
       <select id="trabajador" name="trabajador" required>
         <option value="">Selecciona un trabajador</option>
@@ -64,22 +78,43 @@
       </select>
     </label>
 
-    <label>Uso correcto de cofia o gorro:
-      <select name="cofia">
+    <label>Manos sin cortes, ulceraciones o infecciones:
+      <select name="manos">
         <option value="Si">✔ Sí</option>
         <option value="No">✘ No</option>
       </select>
     </label>
 
-    <label>Uñas cortas y limpias:
+    <label>Uñas limpias cortas y sin esmalte:
       <select name="unas">
         <option value="Si">✔ Sí</option>
         <option value="No">✘ No</option>
       </select>
     </label>
 
-    <label>Manos limpias y sin heridas:
-      <select name="manos">
+    <label>Cabello corto para hombres, recogido en caso de mujeres:
+      <select name="cabello">
+        <option value="Si">✔ Sí</option>
+        <option value="No">✘ No</option>
+      </select>
+    </label>
+
+    <label>Ausencia de barba:
+      <select name="barba">
+        <option value="Si">✔ Sí</option>
+        <option value="No">✘ No</option>
+      </select>
+    </label>
+
+    <label>Cumple con no usar accesorios: sortijas, pulseras, reloj u otros:
+      <select name="accesorios">
+        <option value="Si">✔ Sí</option>
+        <option value="No">✘ No</option>
+      </select>
+    </label>
+
+    <label>Cumple con no comer, beber ni masticar chicle dentro de las áreas de trabajo:
+      <select name="alimentos">
         <option value="Si">✔ Sí</option>
         <option value="No">✘ No</option>
       </select>
@@ -93,7 +128,7 @@
   </form>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbw0AEh7vWvOGl4XaN9OhPCPDLun__2JHeGwh9-qMLA8UiiyBFIwx967gEytNXyLPxnP/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzgsXoETdagVpsMjmfJ9xxDGSM_aZ-TPVn6BovpI9_mxk5mVoCt4WSPsgfGDmzRfFwa/exec';
     const listURL = 'https://script.google.com/macros/s/AKfycbzncYwulsScLe0kYjGKVmLAkV_4iE6uwCXGOiYZjbwCqAWtMSEiX5kQJ9cgKMxh6Hzm/exec';
     const form = document.getElementById('formulario');
     const selectTrabajador = document.getElementById('trabajador');
@@ -175,7 +210,14 @@
         .then(response => {
           if (response.ok) {
             alert('Formulario enviado correctamente');
+		 // Guardar valores antes del reset
+ 		const turnoSeleccionado = form.turno.value;
+      		const nombreAlmacenero = form.almacenero.value;
             form.reset();
+ 		// Restaurar los campos específicos
+      		form.turno.value = turnoSeleccionado;
+      		form.almacenero.value = nombreAlmacenero;
+
           } else {
             alert('Error al enviar el formulario.');
           }
